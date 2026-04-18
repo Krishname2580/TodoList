@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                url("https://images.unsplash.com/photo-1604975701397-6365ccbd028a?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+        }
+
+        /* Glass container */
+        .controls,
+        form {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        /* Headings */
+        h2 {
+            margin-top: 40px;
+            margin-bottom: 10px;
+            text-align: left;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        /* Input & buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input,
+        button {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        button {
+            background: #0d6efd;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            color: #fff;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        tbody tr {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Action buttons */
+        td button {
+            margin: 2px;
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+
+        td button:nth-child(1) {
+            background: #198754;
+            /* View */
+        }
+
+        td button:nth-child(2) {
+            background: #0dcaf0;
+            /* Edit */
+            color: #000;
+        }
+
+        td button:nth-child(3) {
+            background: #dc3545;
+            /* Delete */
+        }
+
+        /* MODAL BACKGROUND */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        /* POPUP BOX */
+        .modal-box {
+            background: #0d4871;
+            padding: 20px;
+            width: 350px;
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        /* HEADER */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* BODY */
+        .modal-body {
+            margin-top: 15px;
+        }
+
+        .modal-body label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        /* CLOSE BUTTON */
+        .close-main {
+            margin-top: 15px;
+            width: 100%;
+            background: rgb(201, 20, 20);
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Button -->
+    <h2 class="cng">Create Your Movie List:-</h2>
+    <div class="controls">
+        <input id="task" type="text" placeholder="Movie Name" />
+        <input id="name" type="text" placeholder="Amount" />
+        <input id="search" type="search" placeholder="Search movie or price" />
+        <button type="button" onclick="searchMenu()">Search</button>
+        <button onclick="Add()">Add Name</button>
+    </div>
+
+
+    <!-- VIEW MODAL -->
+    <div class="modal" id="viewModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Movie Details </h2>
+                <span class="close-btn" onclick="closeModal()">✖</span>
+            </div>
+
+            <div class="modal-body">
+                <label>Movie Name:</label>
+                <input type="text" id="viewName" readonly />
+
+                <label>Ticket Price (₹):</label>
+                <input type="text" id="viewPrice" readonly />
+            </div>
+
+            <button class="close-main" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+
+    <!-- Table List -->
+    <form action="">
+        <h2 id="table">Available Movies:-</h2>
+        <table border="2" cellpadding="12" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Movie Name</th>
+                    <th>Ticket Price(₹)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </form>
+
+
+
+</body>
+<script>
+    let editIndex = null;
+    let searchInput = null;
+    document.addEventListener("DOMContentLoaded", () => show());
+
+    function Add() {
+        let a = document.getElementById('task').value
+        let d = document.getElementById('name').value
+
+        let b = JSON.parse(localStorage.getItem("tasks")) || [];
+        if (editIndex !== null) {
+            b[editIndex] = { a, d };
+            localStorage.setItem("tasks", JSON.stringify(b));
+            editIndex = null;
+            show();
+            return;
+        }
+        let c = b.filter((item) => item.a == a);
+        if (c.length > 0) {
+            alert("Dublicate value not accept");
+            return;
+        }
+        b.push({ a, d })
+        localStorage.setItem("tasks", JSON.stringify(b));
+
+        show();
+        document.getElementById("task").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("search").value = "";
+        document.getElementById("show").innerHTML = "";
+
+    }
+
+
+
+    function show(data = null) {
+
+        let tableBody = document.getElementById("tableBody")
+        let tasks = data || JSON.parse(localStorage.getItem("tasks")) || [];
+        tableBody.innerHTML = "";
+
+        tasks.length > 0
+            ? tasks.forEach((item, index) => {
+                const realIndex = item.originalIndex ?? index;
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${item.a}</td>
+                <td>₹ ${item.d}</td>
+                <td>
+                    <button type="button" onclick="viewRow(${realIndex})">View</button>
+                    <button type="button" onclick="editRow(${realIndex})">Edit</button>
+                    <button type="button" onclick="deleteRow(${realIndex})">Delete</button>
+                </td>   
+            `;
+                tableBody.appendChild(row)
+            })
+            : tableBody.innerHTML = `
+        <tr>
+            <td colspan="2" style="text-align:center;">No Data Found</td>
+        </tr>
+        `
+    }
+    function viewRow(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        if (!tasks[index]) {
+            alert("Data not found");
+            return;
+        }
+
+        let task = tasks[index];
+
+        // Set modal values
+        document.getElementById("viewName").value = task.a;
+        document.getElementById("viewPrice").value = task.d;
+
+        // Show modal
+        document.getElementById("viewModal").style.display = "flex";
+    }
+    function closeModal() {
+        document.getElementById("viewModal").style.display = "none";
+    }
+
+
+
+    function editRow(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        editIndex = index;
+        document.getElementById("task").value = tasks[index]?.a;
+        document.getElementById("name").value = tasks[index]?.d;
+
+    }
+
+    function deleteRow(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        let newTasks = tasks.filter((item, i) => i !== index);
+
+        localStorage.setItem("tasks", JSON.stringify(newTasks));
+        show();
+        document.getElementById("show").innerHTML = "";
+
+    }
+
+
+    function searchMenu() {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        let search = document.getElementById("search").value.trim().toLowerCase();
+        if (!search) {
+            show();
+            return;
+        }
+        let filtered = tasks.map((item, index) => ({ ...item, originalIndex: index })).filter(item => item.a.toLowerCase().includes(search) || item.d.toLowerCase().includes(search));
+        show(filtered);
+    }
+
+    window.onload = function () {
+        show()
+    }
+</script>
+
+</html>
